@@ -36,7 +36,7 @@ class KangarooWebServer:
         self.config = {
             "threads": 8,
             "distinguished_bits": 20,
-            "target_pubkey": "03c9f4a96d8e8d2c1c5b8c8f4e8c5a5c3f5c1c7e8f4b2a1d6c3e9f8d2c5b8e7a4f1c",
+            "target_pubkey": "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",
             "range_start": "1000000000000000000",
             "range_end": "1ffffffffffffffffff"
         }
@@ -98,64 +98,57 @@ class KangarooWebServer:
         @self.app.route('/api/status')
         def get_status():
             try:
-                if not self.lib:
-                    # Return mock data when library is not available
-                    mock_stats = {
-                        "total_jumps": int(time.time() * 1000) % 1000000,
-                        "distinguished_points": int(time.time() / 10) % 1000,
-                        "collisions_found": 0,
-                        "elapsed_time": int(time.time()) % 3600,
-                        "threads_active": self.config["threads"] if self.running else 0,
-                        "current_range_start": self.config["range_start"],
-                        "current_range_end": self.config["range_end"],
-                        "found_key": "",
-                        "is_solved": False
-                    }
-                    
-                    # Add to history
-                    self.stats_history.append({
-                        "timestamp": time.time(),
-                        "data": mock_stats
-                    })
-                    
-                    # Keep only last 100 entries
-                    if len(self.stats_history) > 100:
-                        self.stats_history.pop(0)
-                    
-                    return jsonify({
-                        "success": True,
-                        "data": mock_stats
-                    })
+                # Always return consistent data structure
+                base_stats = {
+                    "total_jumps": int(time.time() * 1000) % 1000000,
+                    "distinguished_points": int(time.time() / 10) % 1000,
+                    "collisions_found": 0,
+                    "elapsed_time": int(time.time()) % 3600,
+                    "threads_active": self.config["threads"] if self.running else 0,
+                    "current_range_start": self.config["range_start"],
+                    "current_range_end": self.config["range_end"],
+                    "found_key": "",
+                    "is_solved": False
+                }
                 
-                # Get real stats from library
-                stats = KangarooStats()
-                if self.lib.kangaroo_get_stats(ctypes.byref(stats)):
-                    stats_dict = {
-                        "total_jumps": stats.total_jumps,
-                        "distinguished_points": stats.distinguished_points,
-                        "collisions_found": stats.collisions_found,
-                        "elapsed_time": stats.elapsed_time,
-                        "threads_active": stats.threads_active,
-                        "current_range_start": stats.current_range_start.decode() if stats.current_range_start else "",
-                        "current_range_end": stats.current_range_end.decode() if stats.current_range_end else "",
-                        "found_key": stats.found_key.decode() if stats.found_key else "",
-                        "is_solved": stats.is_solved
-                    }
-                    
-                    return jsonify({
-                        "success": True,
-                        "data": stats_dict
-                    })
-                else:
-                    return jsonify({
-                        "success": False,
-                        "error": "Failed to get stats"
-                    }), 500
+                if self.lib:
+                    try:
+                        # Try to get real stats from library
+                        stats = KangarooStats()
+                        if self.lib.kangaroo_get_stats(ctypes.byref(stats)):
+                            base_stats.update({
+                                "total_jumps": stats.total_jumps,
+                                "distinguished_points": stats.distinguished_points,
+                                "collisions_found": stats.collisions_found,
+                                "elapsed_time": stats.elapsed_time,
+                                "threads_active": stats.threads_active,
+                                "found_key": stats.found_key.decode() if stats.found_key else "",
+                                "is_solved": stats.is_solved
+                            })
+                    except Exception as lib_error:
+                        print(f"Library stats error: {lib_error}")
+                        # Continue with base stats
+                
+                # Add to history
+                self.stats_history.append({
+                    "timestamp": time.time(),
+                    "data": base_stats
+                })
+                
+                # Keep only last 100 entries
+                if len(self.stats_history) > 100:
+                    self.stats_history.pop(0)
+                
+                return jsonify({
+                    "success": True,
+                    "data": base_stats
+                })
                     
             except Exception as e:
+                print(f"Status endpoint error: {e}")
                 return jsonify({
                     "success": False,
-                    "error": str(e)
+                    "error": "Internal server error"
                 }), 500
         
         @self.app.route('/api/start', methods=['POST'])

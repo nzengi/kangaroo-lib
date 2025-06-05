@@ -64,6 +64,12 @@ public:
     }
     
     bool initialize(const std::string& pubkey, const std::string& start, const std::string& end, int threads, int dist_bits) {
+        // Basic validation - accept any reasonable hex string
+        if (pubkey.length() < 32 || pubkey.length() > 132) {
+            std::cerr << "Error: Invalid public key format" << std::endl;
+            return false;
+        }
+        
         target_pubkey = pubkey;
         range_start = start;
         range_end = end;

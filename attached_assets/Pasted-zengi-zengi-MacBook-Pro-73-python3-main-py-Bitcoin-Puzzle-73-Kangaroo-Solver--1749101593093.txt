@@ -1,0 +1,54 @@
+zengi@zengi-MacBook-Pro 73 % python3 main.py
+🦘 Bitcoin Puzzle #73 Kangaroo Solver
+==================================================
+Starting web interface...
+
+Target Information:
+  Puzzle: #73
+  Address: 12VVRNPi4SJqUTsp6FmqDqY5sGosDtysn4
+  Range: 0x1000000000000000000 - 0x1ffffffffffffffffff
+  Search Space: 2^72 (≈ 4.7 × 10^21)
+
+Kangaroo library loaded successfully
+🌐 Web interface starting on http://0.0.0.0:5002
+   Access the solver dashboard in your browser
+   Press Ctrl+C to stop
+==================================================
+Starting Bitcoin Kangaroo Solver web interface on http://0.0.0.0:5002
+ * Serving Flask app 'web_server'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5002
+ * Running on http://192.168.110.99:5002
+Press CTRL+C to quit
+ * Restarting with stat
+🦘 Bitcoin Puzzle #73 Kangaroo Solver
+==================================================
+Starting web interface...
+
+Target Information:
+  Puzzle: #73
+  Address: 12VVRNPi4SJqUTsp6FmqDqY5sGosDtysn4
+  Range: 0x1000000000000000000 - 0x1ffffffffffffffffff
+  Search Space: 2^72 (≈ 4.7 × 10^21)
+
+Kangaroo library loaded successfully
+🌐 Web interface starting on http://0.0.0.0:5002
+   Access the solver dashboard in your browser
+   Press Ctrl+C to stop
+==================================================
+Starting Bitcoin Kangaroo Solver web interface on http://0.0.0.0:5002
+ * Debugger is active!
+ * Debugger PIN: 350-413-212
+127.0.0.1 - - [05/Jun/2025 08:32:46] "GET /api/status HTTP/1.1" 500 -
+127.0.0.1 - - [05/Jun/2025 08:32:47] "GET /api/status HTTP/1.1" 500 -
+127.0.0.1 - - [05/Jun/2025 08:32:48] "GET /api/status HTTP/1.1" 500 -
+127.0.0.1 - - [05/Jun/2025 08:32:49] "GET /api/status HTTP/1.1" 500 -
+127.0.0.1 - - [05/Jun/2025 08:32:50] "GET /api/status HTTP/1.1" 500 -
+127.0.0.1 - - [05/Jun/2025 08:32:51] "GET /api/status HTTP/1.1" 500 -
+Error: Invalid public key format
+127.0.0.1 - - [05/Jun/2025 08:32:52] "POST /api/start HTTP/1.1" 500 -
+/Users/zengi/.pyenv/versions/3.9.7/lib/python3.9/multiprocessing/resource_tracker.py:216: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+zengi@zengi-MacBook-Pro 73 % 
