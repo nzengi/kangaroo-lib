@@ -22,8 +22,12 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "bash build.sh setup && python3 main.py"
+args = "python3 main.py"
 waitForPort = 5000
 
 [deployment]
-run = ["sh", "-c", "bash build.sh setup && python3 main.py"]
+run = ["sh", "-c", "python3 main.py"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80

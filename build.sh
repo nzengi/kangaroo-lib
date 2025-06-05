@@ -173,30 +173,18 @@ build_library() {
     echo "Using CXXFLAGS: $CXXFLAGS"
     echo "Using LDFLAGS: $LDFLAGS"
     
-    # Compile source files
-    echo "Compiling source files..."
+    # Compile simplified version
+    echo "Compiling simplified kangaroo solver..."
     
-    echo "Compiling ecc_utils.cpp..."
-    if ! g++ $CXXFLAGS -c ecc_utils.cpp -o ecc_utils.o; then
-        echo "Failed to compile ecc_utils.cpp"
-        return 1
-    fi
-    
-    echo "Compiling checkpoint.cpp..."
-    if ! g++ $CXXFLAGS -c checkpoint.cpp -o checkpoint.o; then
-        echo "Failed to compile checkpoint.cpp"
-        return 1
-    fi
-    
-    echo "Compiling kangaroo_solver.cpp..."
-    if ! g++ $CXXFLAGS -c kangaroo_solver.cpp -o kangaroo_solver.o; then
-        echo "Failed to compile kangaroo_solver.cpp"
+    echo "Compiling simple_kangaroo.cpp..."
+    if ! g++ $CXXFLAGS -c simple_kangaroo.cpp -o simple_kangaroo.o; then
+        echo "Failed to compile simple_kangaroo.cpp"
         return 1
     fi
     
     # Link shared library
     echo "Linking shared library..."
-    if ! g++ -shared kangaroo_solver.o ecc_utils.o checkpoint.o -o libkangaroo.$LIB_EXT $LDFLAGS; then
+    if ! g++ -shared simple_kangaroo.o -o libkangaroo.$LIB_EXT -lpthread; then
         echo "Failed to link shared library"
         return 1
     fi
