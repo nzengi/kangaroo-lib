@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Puzzle #73 Kangaroo Solver</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-bitcoin"></i> Bitcoin Puzzle #73 Kangaroo Solver</h1>
+            <p>Advanced Pollard's Kangaroo Algorithm Implementation</p>
+        </header>
+
+        <div class="dashboard">
+            <!-- Status Card -->
+            <div class="card status-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-info-circle"></i> Status</h2>
+                    <div class="status-indicator" id="status-indicator">
+                        <span class="status-dot"></span>
+                        <span id="status-text">Initializing...</span>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="runtime">--</div>
+                            <div class="stat-label">Runtime</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="threads">--</div>
+                            <div class="stat-label">Threads</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="total-jumps">--</div>
+                            <div class="stat-label">Total Jumps</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="jump-rate">--</div>
+                            <div class="stat-label">Jump Rate</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Card -->
+            <div class="card progress-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-chart-line"></i> Progress</h2>
+                </div>
+                <div class="card-content">
+                    <div class="progress-info">
+                        <div class="progress-item">
+                            <label>Distinguished Points:</label>
+                            <span id="distinguished-points">--</span>
+                        </div>
+                        <div class="progress-item">
+                            <label>Collisions Found:</label>
+                            <span id="collisions">--</span>
+                        </div>
+                        <div class="progress-item">
+                            <label>DP Rate:</label>
+                            <span id="dp-rate">--</span>
+                        </div>
+                        <div class="progress-item">
+                            <label>Estimated Time:</label>
+                            <span id="eta">--</span>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="progress-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Target Information -->
+            <div class="card target-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-crosshairs"></i> Target Information</h2>
+                </div>
+                <div class="card-content">
+                    <div class="target-info">
+                        <div class="info-item">
+                            <label>Puzzle Number:</label>
+                            <span class="puzzle-number">#73</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Bitcoin Address:</label>
+                            <span class="address">12VVRNPi4SJqUTsp6FmqDqY5sGosDtysn4</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Search Range:</label>
+                            <div class="range-info">
+                                <div>Start: <code>0x1000000000000000000</code></div>
+                                <div>End: <code>0x1ffffffffffffffffff</code></div>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <label>Range Size:</label>
+                            <span>2^72 (≈ 4.7 × 10^21)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="card controls-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-cogs"></i> Controls</h2>
+                </div>
+                <div class="card-content">
+                    <div class="controls">
+                        <button id="start-btn" class="btn btn-primary">
+                            <i class="fas fa-play"></i> Start
+                        </button>
+                        <button id="stop-btn" class="btn btn-secondary" disabled>
+                            <i class="fas fa-stop"></i> Stop
+                        </button>
+                        <button id="save-checkpoint-btn" class="btn btn-tertiary">
+                            <i class="fas fa-save"></i> Save Checkpoint
+                        </button>
+                        <button id="load-checkpoint-btn" class="btn btn-tertiary">
+                            <i class="fas fa-folder-open"></i> Load Checkpoint
+                        </button>
+                    </div>
+                    
+                    <div class="settings">
+                        <div class="setting-item">
+                            <label for="threads-input">Threads:</label>
+                            <input type="number" id="threads-input" min="1" max="64" value="8">
+                        </div>
+                        <div class="setting-item">
+                            <label for="distinguished-bits-input">Distinguished Bits:</label>
+                            <input type="number" id="distinguished-bits-input" min="8" max="32" value="20">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log Output -->
+            <div class="card log-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-terminal"></i> Log Output</h2>
+                    <button id="clear-log-btn" class="btn btn-small">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                </div>
+                <div class="card-content">
+                    <div id="log-output" class="log-output"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Solution Modal -->
+        <div id="solution-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-trophy"></i> Puzzle Solved!</h2>
+                </div>
+                <div class="modal-body">
+                    <p>🎉 Congratulations! The private key has been found:</p>
+                    <div class="solution-key">
+                        <code id="solution-private-key">--</code>
+                    </div>
+                    <div class="solution-stats">
+                        <div class="stat">
+                            <label>Total Jumps:</label>
+                            <span id="solution-jumps">--</span>
+                        </div>
+                        <div class="stat">
+                            <label>Time Taken:</label>
+                            <span id="solution-time">--</span>
+                        </div>
+                        <div class="stat">
+                            <label>Average Rate:</label>
+                            <span id="solution-rate">--</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="copy-key-btn" class="btn btn-primary">
+                        <i class="fas fa-copy"></i> Copy Private Key
+                    </button>
+                    <button id="close-modal-btn" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

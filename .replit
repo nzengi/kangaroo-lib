@@ -1,0 +1,28 @@
+modules = ["python-3.11"]
+
+[nix]
+channel = "stable-24_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Bitcoin Kangaroo Solver"
+
+[[workflows.workflow]]
+name = "Bitcoin Kangaroo Solver"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash build.sh setup && python3 main.py"
+waitForPort = 5000
+
+[deployment]
+run = ["sh", "-c", "bash build.sh setup && python3 main.py"]
