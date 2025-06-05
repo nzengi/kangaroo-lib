@@ -22,7 +22,27 @@ command_exists() {
 
 # Function to install dependencies on different systems
 install_dependencies() {
-    echo "Installing dependencies..."
+    echo "Checking dependencies..."
+    
+    # In Replit, dependencies should be installed via Nix
+    if [ -n "$REPL_ID" ]; then
+        echo "Running in Replit environment - dependencies should be managed via Nix"
+        echo "Required dependencies: gcc, g++, gmp, openssl, jsoncpp, pkg-config"
+        
+        # Check if essential tools are available
+        if ! command_exists g++; then
+            echo "Error: g++ compiler not found. Please install gcc via Nix."
+            exit 1
+        fi
+        
+        if ! command_exists pkg-config; then
+            echo "Error: pkg-config not found. Please install pkg-config via Nix."
+            exit 1
+        fi
+        
+        echo "Essential build tools found."
+        return 0
+    fi
     
     case "$OS" in
         Linux*)
@@ -106,9 +126,9 @@ install_python_deps() {
 build_library() {
     echo "Building Kangaroo solver library..."
     
-    # Set compiler flags
-    CXXFLAGS="-std=c++17 -O3 -march=native -mtune=native -Wall -Wextra -fopenmp -fPIC"
-    LDFLAGS="-lgmp -lcrypto -ljsoncpp -fopenmp"
+    # Set compiler flags - remove OpenMP for now to simplify build
+    CXXFLAGS="-std=c++17 -O2 -Wall -Wextra -fPIC"
+    LDFLAGS="-lgmp -lcrypto"
     
     # Platform-specific adjustments
     case "$OS" in
@@ -126,18 +146,64 @@ build_library() {
             ;;
     esac
     
+    # Check for pkg-config and use it if available
+    if command_exists pkg-config; then
+        echo "Using pkg-config for library detection..."
+        
+        # Try to find libraries with pkg-config
+        if pkg-config --exists gmp 2>/dev/null; then
+            CXXFLAGS="$CXXFLAGS $(pkg-config --cflags gmp)"
+            LDFLAGS="$LDFLAGS $(pkg-config --libs gmp)"
+        fi
+        
+        if pkg-config --exists openssl 2>/dev/null; then
+            CXXFLAGS="$CXXFLAGS $(pkg-config --cflags openssl)"
+            LDFLAGS="$LDFLAGS $(pkg-config --libs openssl)"
+        fi
+        
+        if pkg-config --exists jsoncpp 2>/dev/null; then
+            CXXFLAGS="$CXXFLAGS $(pkg-config --cflags jsoncpp)"
+            LDFLAGS="$LDFLAGS $(pkg-config --libs jsoncpp)"
+        else
+            # Fallback for jsoncpp
+            LDFLAGS="$LDFLAGS -ljsoncpp"
+        fi
+    fi
+    
+    echo "Using CXXFLAGS: $CXXFLAGS"
+    echo "Using LDFLAGS: $LDFLAGS"
+    
     # Compile source files
     echo "Compiling source files..."
-    g++ $CXXFLAGS -c kangaroo_solver.cpp -o kangaroo_solver.o
-    g++ $CXXFLAGS -c ecc_utils.cpp -o ecc_utils.o
-    g++ $CXXFLAGS -c checkpoint.cpp -o checkpoint.o
+    
+    echo "Compiling ecc_utils.cpp..."
+    if ! g++ $CXXFLAGS -c ecc_utils.cpp -o ecc_utils.o; then
+        echo "Failed to compile ecc_utils.cpp"
+        return 1
+    fi
+    
+    echo "Compiling checkpoint.cpp..."
+    if ! g++ $CXXFLAGS -c checkpoint.cpp -o checkpoint.o; then
+        echo "Failed to compile checkpoint.cpp"
+        return 1
+    fi
+    
+    echo "Compiling kangaroo_solver.cpp..."
+    if ! g++ $CXXFLAGS -c kangaroo_solver.cpp -o kangaroo_solver.o; then
+        echo "Failed to compile kangaroo_solver.cpp"
+        return 1
+    fi
     
     # Link shared library
     echo "Linking shared library..."
-    g++ -shared kangaroo_solver.o ecc_utils.o checkpoint.o -o libkangaroo.$LIB_EXT $LDFLAGS
+    if ! g++ -shared kangaroo_solver.o ecc_utils.o checkpoint.o -o libkangaroo.$LIB_EXT $LDFLAGS; then
+        echo "Failed to link shared library"
+        return 1
+    fi
     
     echo "Build completed successfully!"
     echo "Library: libkangaroo.$LIB_EXT"
+    return 0
 }
 
 # Function to test the build

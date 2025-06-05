@@ -271,7 +271,6 @@ bool hex_to_point(const std::string& hex, ECPoint& point) {
         
         if (clean_hex.length() == 66 && clean_hex[0] == '0') {
             // Compressed format
-            bool is_even = (clean_hex[1] == '2');
             std::string x_hex = clean_hex.substr(2);
             
             point.x = hex_to_bigint(x_hex);

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
 #include <gmp.h>
 
 // Big integer type (using GMP)
